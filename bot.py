@@ -3,7 +3,7 @@ import logging
 import yt_dlp
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import Message, InputFile
+from aiogram.types import Message, FSInputFile
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
@@ -51,10 +51,12 @@ async def send_media(message: Message):
         video, audio = download_media(query)
         
         # Videoni yuborish
-        await message.answer_video(InputFile(video))
+        video_file = FSInputFile(video)
+        await message.answer_video(video_file)
         
         # Audioni yuborish
-        await message.answer_audio(InputFile(audio))
+        audio_file = FSInputFile(audio)
+        await message.answer_audio(audio_file)
         
         # Fayllarni o‘chirish
         os.remove(video)
@@ -70,4 +72,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
