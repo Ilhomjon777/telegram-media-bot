@@ -2,3 +2,4 @@ aiogram
 yt-dlp
 ffmpeg
 python-dotenv
+ffmpeg-python
