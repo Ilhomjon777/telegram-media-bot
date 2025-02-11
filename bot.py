@@ -3,23 +3,18 @@ import logging
 import yt_dlp
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import Message
-from aiogram import F  # Aiogram 3 uchun kerak
-from aiogram.filters import Command
+from aiogram.utils import executor
+from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import FSInputFile
-from aiogram.utils.markdown import hbold
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.methods import SendMessage
-import asyncio
 from dotenv import load_dotenv
 
 # Muhit o'zgaruvchilarini yuklash
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Telegram bot obyektini yaratish
-bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
-dp = Dispatcher()
+# Telegram bot obyektini yaratish (to‘g‘ri usul)
+bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher(bot)
 
 # Loglarni sozlash
 logging.basicConfig(level=logging.INFO)
@@ -41,11 +36,7 @@ def download_media(query):
         os.system(f"ffmpeg -i \"{video_file}\" -q:a 0 -map a \"{audio_file}\" -y")
         return video_file, audio_file
 
-@dp.message(Command("start"))
-async def start_handler(message: Message):
-    await message.answer("Salom! Video yoki qo‘shiq nomini yozing.")
-
-@dp.message()
+@dp.message_handler()
 async def send_media(message: Message):
     query = message.text
     await message.reply("⏳ Iltimos, kuting... Video va audio yuklab olinmoqda.")
@@ -54,10 +45,12 @@ async def send_media(message: Message):
         video, audio = download_media(query)
         
         # Videoni yuborish
-        await message.answer_video(FSInputFile(video))
+        with open(video, "rb") as vid:
+            await bot.send_video(message.chat.id, vid)
         
         # Audioni yuborish
-        await message.answer_audio(FSInputFile(audio))
+        with open(audio, "rb") as aud:
+            await bot.send_audio(message.chat.id, aud)
         
         # Fayllarni o‘chirish
         os.remove(video)
@@ -65,9 +58,6 @@ async def send_media(message: Message):
     except Exception as e:
         await message.reply(f"❌ Xatolik yuz berdi: {str(e)}")
 
-async def main():
-    await dp.start_polling(bot)
-
+# Botni ishga tushirish
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    executor.start_polling(dp, skip_updates=True)
