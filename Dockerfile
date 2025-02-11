@@ -4,6 +4,9 @@ FROM python:3.12
 # FFMPEG va boshqa zaruriy paketlarni o‘rnatish
 RUN apt-get update && apt-get install -y ffmpeg
 
+# yt-dlp yangilangan versiyasini o‘rnatamiz
+RUN pip install --no-cache-dir --upgrade yt-dlp
+
 # Ishchi katalogni yaratamiz
 WORKDIR /app
 
