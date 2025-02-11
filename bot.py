@@ -1,9 +1,9 @@
 import os
 import logging
 import yt_dlp
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import Message
-from aiogram.utils import executor
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
@@ -14,7 +14,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 # Telegram bot obyektini yaratish (to‘g‘ri usul)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 # Loglarni sozlash
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +36,7 @@ def download_media(query):
         os.system(f"ffmpeg -i \"{video_file}\" -q:a 0 -map a \"{audio_file}\" -y")
         return video_file, audio_file
 
-@dp.message_handler()
+@dp.message()
 async def send_media(message: Message):
     query = message.text
     await message.reply("⏳ Iltimos, kuting... Video va audio yuklab olinmoqda.")
@@ -58,6 +58,10 @@ async def send_media(message: Message):
     except Exception as e:
         await message.reply(f"❌ Xatolik yuz berdi: {str(e)}")
 
-# Botni ishga tushirish
+# Botni ishga tushirish (asyncio orqali)
+async def main():
+    await dp.start_polling(bot)
+
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
+
