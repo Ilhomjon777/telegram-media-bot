@@ -42,7 +42,7 @@ def download_media(query):
         return video_file, audio_file
 
 # Telegram bot orqali media jo‘natish
-@dp.message_handler()
+@dp.message()  # Yangi `aiogram v3` sintaksisi
 async def send_media(message: Message):
     query = message.text
     await message.reply("⏳ Iltimos, kuting... Video va audio yuklab olinmoqda.")
@@ -70,3 +70,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
